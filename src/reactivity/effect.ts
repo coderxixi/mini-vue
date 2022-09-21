@@ -3,8 +3,9 @@
 
 class ReactiveEffect {
   private _fn: any
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn
+    this.scheduler = scheduler
   }
 
   run() {
@@ -38,14 +39,19 @@ export function trigger(target, key) {
   // 取出依赖
   let dep = depsMap.get(key);
   for (let effect of dep) {
-    effect.run()
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run()
+    }
   }
 }
 
 let activeEffect;
-export function effect(fn) {
+export function effect(fn, options:any={}) {
   // todo 创建一个effect实例
-  const _effect = new ReactiveEffect(fn);
+  let {scheduler}=options
+  const _effect = new ReactiveEffect(fn, scheduler);
   //调用effect执行用户传进来的fn
   _effect.run();
   return _effect.run.bind(_effect);
