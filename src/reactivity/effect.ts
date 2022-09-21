@@ -1,9 +1,10 @@
 // todo 创建一个类进行封装
-// 用一个全局变量来获取用户传进来的fn
-
+// 记录当前活跃的对象
+let activeEffect;
 class ReactiveEffect {
   private _fn: any
   constructor(fn, public scheduler?) {
+    // 用户传进来的副作用函数。
     this._fn = fn
     this.scheduler = scheduler
   }
@@ -47,7 +48,7 @@ export function trigger(target, key) {
   }
 }
 
-let activeEffect;
+
 export function effect(fn, options:any={}) {
   // todo 创建一个effect实例
   let {scheduler}=options
