@@ -3,6 +3,7 @@ import {extend} from "../shared/index"
 // todo 创建一个类进行封装
 // 记录当前活跃的对象
 let activeEffect;
+let shouldTrack;
 class ReactiveEffect {
   private _fn: any
   deps=[];
@@ -15,8 +16,15 @@ class ReactiveEffect {
   }
 
   run() {
+    if(!this.active){
+      return this._fn()
+    }
+    shouldTrack=true;
     activeEffect = this;
-    return this._fn()
+    this._fn();
+    shouldTrack=false
+   const result =this._fn();
+   return result
   }
   stop(){
     //删除effect 
@@ -35,11 +43,13 @@ function cleanupEffect(effect){
   effect.deps.forEach((dep:any)=>{
     dep.delete(effect)
   })
+  effect.deps.length=0
 }
 const targetMap = new WeakMap()
 
 export function track(target, key) {
   //todo 收集依赖
+ if(!isTracking()) return
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -50,10 +60,14 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep)
   }
-  if(!activeEffect) return
+ if(dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
 
+}
+
+function isTracking(){
+  return shouldTrack&&activeEffect!=undefined
 }
 
 export function trigger(target, key) {
