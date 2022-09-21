@@ -1,8 +1,13 @@
+
+import {extend} from "../shared/index"
 // todo 创建一个类进行封装
 // 记录当前活跃的对象
 let activeEffect;
 class ReactiveEffect {
   private _fn: any
+  deps=[];
+  active=true;
+  onStop?:()=>void;
   constructor(fn, public scheduler?) {
     // 用户传进来的副作用函数。
     this._fn = fn
@@ -13,8 +18,24 @@ class ReactiveEffect {
     activeEffect = this;
     return this._fn()
   }
+  stop(){
+    //删除effect 
+    if(this.active){
+      if(this.onStop){
+        this.onStop()
+      }
+      cleanupEffect(this);
+      this.active=false
+    }
+   
+   
+  }
 }
-
+function cleanupEffect(effect){
+  effect.deps.forEach((dep:any)=>{
+    dep.delete(effect)
+  })
+}
 const targetMap = new WeakMap()
 
 export function track(target, key) {
@@ -29,8 +50,9 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep)
   }
+  if(!activeEffect) return
   dep.add(activeEffect)
-
+  activeEffect.deps.push(dep)
 
 }
 
@@ -51,9 +73,16 @@ export function trigger(target, key) {
 
 export function effect(fn, options:any={}) {
   // todo 创建一个effect实例
-  let {scheduler}=options
-  const _effect = new ReactiveEffect(fn, scheduler);
+  const _effect = new ReactiveEffect(fn, options.scheduler);
+  extend(_effect,options)
   //调用effect执行用户传进来的fn
   _effect.run();
-  return _effect.run.bind(_effect);
+  const runner:any=_effect.run.bind(_effect);
+  runner.effect=_effect
+  return runner
+}
+
+
+export function stop(runner){
+  runner.effect.stop()
 }
