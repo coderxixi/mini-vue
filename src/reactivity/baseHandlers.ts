@@ -1,19 +1,24 @@
 import { track, trigger } from "./effect"
 import { ReactFlags, reactive, readonly } from "./reactive"
 import { isObject } from "../shared/index"
+import {extend} from "../shared"
 const get = createGetter();
 const set = createSetter();
-const readonlyGet = createGetter(true)
-function createGetter(isReaodonly = false) {
+const readonlyGet = createGetter(true);
+const shallowReactiveGet=createGetter(true,true)
+function createGetter(isReaodonly = false,shallow=false) {
   return function get(target, key) {
     const res = Reflect.get(target, key);
+   
     // todo 在这里进行依赖收集
     if (key == ReactFlags.IS_REACTIVER) {
       return !isReaodonly
     } else if (key == ReactFlags.IS_READONLY) {
       return isReaodonly
     }
-
+    if(shallow) {
+      return res
+    }
     // 判断 res 是不是对象
     if (isObject(res)) {
       return isReaodonly ? readonly(res) : reactive(res)
@@ -50,3 +55,7 @@ export const readonlyHandles = {
     return true
   }
 }
+
+export const shallowReactiveHandles=extend({},readonlyHandles,{
+  get:shallowReactiveGet
+})

@@ -1,14 +1,14 @@
 
-import {extend} from "../shared/index"
+import { extend } from "../shared/index"
 // todo 创建一个类进行封装
 // 记录当前活跃的对象
 let activeEffect;
 let shouldTrack;
 class ReactiveEffect {
   private _fn: any
-  deps=[];
-  active=true;
-  onStop?:()=>void;
+  deps = [];
+  active = true;
+  onStop?: () => void;
   constructor(fn, public scheduler?) {
     // 用户传进来的副作用函数。
     this._fn = fn
@@ -16,40 +16,39 @@ class ReactiveEffect {
   }
 
   run() {
-    if(!this.active){
+    if (!this.active) {
       return this._fn()
     }
-    shouldTrack=true;
+    shouldTrack = true;
     activeEffect = this;
-    this._fn();
-    shouldTrack=false
-   const result =this._fn();
-   return result
+    let res = this._fn();
+    shouldTrack = false
+    return res
   }
-  stop(){
+  stop() {
     //删除effect 
-    if(this.active){
-      if(this.onStop){
+    if (this.active) {
+      if (this.onStop) {
         this.onStop()
       }
       cleanupEffect(this);
-      this.active=false
+      this.active = false
     }
-   
-   
+
+
   }
 }
-function cleanupEffect(effect){
-  effect.deps.forEach((dep:any)=>{
+function cleanupEffect(effect) {
+  effect.deps.forEach((dep: any) => {
     dep.delete(effect)
   })
-  effect.deps.length=0
+  // effect.deps.length = 0
 }
 const targetMap = new WeakMap()
 
 export function track(target, key) {
   //todo 收集依赖
- if(!isTracking()) return
+  if (!isTracking()) return
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -60,14 +59,14 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep)
   }
- if(dep.has(activeEffect)) return
+  if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
 
 }
 
-function isTracking(){
-  return shouldTrack&&activeEffect!=undefined
+function isTracking() {
+  return shouldTrack && activeEffect != undefined
 }
 
 export function trigger(target, key) {
@@ -85,18 +84,18 @@ export function trigger(target, key) {
 }
 
 
-export function effect(fn, options:any={}) {
+export function effect(fn, options: any = {}) {
   // todo 创建一个effect实例
   const _effect = new ReactiveEffect(fn, options.scheduler);
-  extend(_effect,options)
+  extend(_effect, options)
   //调用effect执行用户传进来的fn
   _effect.run();
-  const runner:any=_effect.run.bind(_effect);
-  runner.effect=_effect
+  const runner: any = _effect.run.bind(_effect);
+  runner.effect = _effect
   return runner
 }
 
 
-export function stop(runner){
+export function stop(runner) {
   runner.effect.stop()
 }

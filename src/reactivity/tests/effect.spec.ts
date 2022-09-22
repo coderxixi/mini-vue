@@ -20,14 +20,14 @@ describe('effect', () => {
     // effect返回一个函数 调用这个函数 会把fn返回值返回出去 会重新执行用户传进来的fn；
      let foo = 10;
      const runner = effect(() => {
-       foo++
-       return 'foo'
-     })
+       foo++;
+       return 'foo';
+     });
      expect(foo).toBe(11);
-     const r = runner()
+     const r = runner();
      expect(foo).toBe(12);
-     expect(r).toBe('foo')
-   })
+     expect(r).toBe('foo');
+   });
 
    it("scheduler", () => {
     let dummy;
