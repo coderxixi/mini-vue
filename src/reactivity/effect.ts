@@ -4,7 +4,7 @@ import { extend } from "../shared/index"
 // 记录当前活跃的对象
 let activeEffect;
 let shouldTrack;
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn: any
   deps = [];
   active = true;
