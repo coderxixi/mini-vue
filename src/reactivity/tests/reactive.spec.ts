@@ -1,5 +1,5 @@
 
-import {reactive,isReactive} from "../reactive"
+import {reactive,isReactive,isProxy} from "../reactive"
 describe('reactive',()=>{
   it('happ path',()=>{
     const original={foo:1};
@@ -7,7 +7,9 @@ describe('reactive',()=>{
     expect(observed).not.toBe(original);
     expect(observed.foo).toBe(1);
     expect(isReactive(observed)).toBe(true);
-    expect(isReactive(original)).toBe(false)
+    expect(isReactive(original)).toBe(false);
+    expect(isProxy(observed)).toBe(true);
+
   })
 
   test('nest reactive',()=>{
@@ -23,4 +25,6 @@ describe('reactive',()=>{
     expect(isReactive(observed.array[0])).toBe(true);
 
   })
+
+
 })

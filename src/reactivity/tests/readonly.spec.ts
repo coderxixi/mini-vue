@@ -1,5 +1,5 @@
 
-import {readonly,isReadonly} from "../reactive"
+import {readonly,isReadonly,isProxy} from "../reactive"
 describe("readonly",()=>{
   it('happy,path',()=>{
     const original={foo:1,bar:{baz:2}};
@@ -8,6 +8,7 @@ describe("readonly",()=>{
     expect(wrapped.foo).toBe(1);
     expect(isReadonly(wrapped)).toBe(true);
     expect(isReadonly(original)).toBe(false);
+    expect(isProxy(wrapped)).toBe(true);
     
   })
   it("warn",()=>{
