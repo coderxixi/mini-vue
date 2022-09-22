@@ -65,7 +65,7 @@ export function track(target, key) {
   trackEffects(dep)
 }
 
-export function trackEffects(dep){
+export function trackEffects(dep) {
   if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
@@ -83,7 +83,7 @@ export function trigger(target, key) {
   let dep = depsMap.get(key);
   triggerEffect(dep)
 }
-export function triggerEffect(dep){
+export function triggerEffect(dep) {
   for (let effect of dep) {
     if (effect.scheduler) {
       effect.scheduler()
