@@ -62,10 +62,17 @@ export function track(target, key) {
   if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
+  trackEffects(dep)
+}
+
+export function trackEffects(dep){
+  if (dep.has(activeEffect)) return
+  dep.add(activeEffect)
+  activeEffect.deps.push(dep)
 
 }
 
-function isTracking() {
+export function isTracking() {
   return shouldTrack && activeEffect != undefined
 }
 
@@ -74,6 +81,9 @@ export function trigger(target, key) {
   let depsMap = targetMap.get(target);
   // 取出依赖
   let dep = depsMap.get(key);
+  triggerEffect(dep)
+}
+export function triggerEffect(dep){
   for (let effect of dep) {
     if (effect.scheduler) {
       effect.scheduler()
@@ -82,7 +92,6 @@ export function trigger(target, key) {
     }
   }
 }
-
 
 export function effect(fn, options: any = {}) {
   // todo 创建一个effect实例
