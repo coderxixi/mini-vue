@@ -4,7 +4,8 @@ export function createComponentInstance(vnode: any) {
   const component = {
     vnode,
     type: vnode.type,
-    setupState: {}
+    setupState: {},
+    el:null
   }
   console.log("===返回组件实例===", component);
   return component;
@@ -23,6 +24,9 @@ function setupStatefulCompontent(instance: any) {
       const { setupState } = instance
       if (key in setupState) {
         return setupState[key]
+      }
+      if(key=="$el"){
+        return instance.vnode.el
       }
     },
 

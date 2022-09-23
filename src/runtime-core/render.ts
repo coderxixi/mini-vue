@@ -32,7 +32,7 @@ function processElement(vnode: any, rootContainer: any) {
 function mountElement(vnode: any, rootContainer: any) {
   let { type, props, children } = vnode;
   //todo children分两种情况 一种是string类型 一种是数组类型
-  let el = document.createElement(type);
+  let el =vnode.el=document.createElement(type);
   if (Array.isArray(children)) {
     //因为children里面每一个都是虚拟节点还需要调用path函数
     mountChildren(children,el)
@@ -69,16 +69,17 @@ function mountComponent(vnode: any, rootContainer: any) {
 
   //传入件实例 初始化组件
   setupComponent(instance);
-  setupRenderEffect(instance, rootContainer)
+  setupRenderEffect(instance, rootContainer,vnode)
 }
 //调用render函数
-function setupRenderEffect(instance: any, rootContainer: any) {
+function setupRenderEffect(instance: any, rootContainer: any,vnode:any,) {
 
   const {proxy}=instance
   //拿到虚拟节点树
   const subTree = instance.render.call(proxy);
   //将虚拟节点转成真实的DOM元素
-  path(subTree, rootContainer)
+  path(subTree, rootContainer);
+  vnode.el=subTree.el
 }
 
 
