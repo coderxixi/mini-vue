@@ -73,8 +73,10 @@ function mountComponent(vnode: any, rootContainer: any) {
 }
 //调用render函数
 function setupRenderEffect(instance: any, rootContainer: any) {
+
+  const {proxy}=instance
   //拿到虚拟节点树
-  const subTree = instance.render();
+  const subTree = instance.render.call(proxy);
   //将虚拟节点转成真实的DOM元素
   path(subTree, rootContainer)
 }

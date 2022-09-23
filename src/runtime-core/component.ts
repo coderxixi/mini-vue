@@ -3,20 +3,30 @@ export function createComponentInstance(vnode: any) {
   console.log("===创建组件实例===", vnode);
   const component = {
     vnode,
-    type: vnode.type
+    type: vnode.type,
+    setupState: {}
   }
-  console.log("===返回组件实例===",component);
+  console.log("===返回组件实例===", component);
   return component;
 }
 export function setupComponent(instance) {
-  console.log("===初始化组件实例对象===",instance);
-   // todo initProps
+  console.log("===初始化组件实例对象===", instance);
+  // todo initProps
   // todo initSlots
   // 拿到setup 中的返回值
   setupStatefulCompontent(instance)
 }
 function setupStatefulCompontent(instance: any) {
   const component = instance.vnode.type;
+  instance.proxy = new Proxy({}, {
+    get(target, key) {
+      const { setupState } = instance
+      if (key in setupState) {
+        return setupState[key]
+      }
+    },
+
+  })
   const { setup } = component;
   //判断是否用了setup 
   if (setup) {
@@ -39,7 +49,7 @@ function handleSetupResult(instance: any, setupResult: any) {
 
 function finishComponentSetup(instance: any) {
   console.log("====finishComponentSetup=====");
-  
+
   const component = instance.type;
   instance.render = component.render;
 }
