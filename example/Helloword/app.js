@@ -1,8 +1,8 @@
-import {h} from "../../lib/guide-mini-vue.esm.js"
+import {h} from "../../lib/mini-vue.esm.js"
 
-export  const App={
+export const App={
    render(){
-    return h('div',`hi,${this.msg}`)
+      return h('div',{color:'red'},'你好 mini-vue')
    },
    setup(){
     return {

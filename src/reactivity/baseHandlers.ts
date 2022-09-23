@@ -1,7 +1,6 @@
 import { track, trigger } from "./effect"
 import { ReactFlags, reactive, readonly } from "./reactive"
-import { isObject } from "../shared/index"
-import {extend} from "../shared"
+import { isObject ,extend} from "../shared/index"
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);

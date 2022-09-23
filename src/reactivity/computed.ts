@@ -1,7 +1,4 @@
 import {ReactiveEffect} from "./effect"
-
-
-
 class ComputedRefImpl {
   private _getter: any;
   private _dirty = true;
