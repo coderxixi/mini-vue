@@ -6,7 +6,7 @@ export function createComponentInstance(vnode: any) {
     type: vnode.type
   }
   console.log("===返回组件实例===",component);
-  return component
+  return component;
 }
 export function setupComponent(instance) {
   console.log("===初始化组件实例对象===",instance);
@@ -40,7 +40,7 @@ function handleSetupResult(instance: any, setupResult: any) {
 function finishComponentSetup(instance: any) {
   console.log("====finishComponentSetup=====");
   
-  const component = instance.type
-  instance.render = component.render
+  const component = instance.type;
+  instance.render = component.render;
 }
 
