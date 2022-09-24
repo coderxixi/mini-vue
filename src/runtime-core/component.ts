@@ -1,6 +1,7 @@
 import {publicInstanceProxyHandlers} from "./componentPublicInstance";
 import { shallowReactive } from "../reactivity/reactive"
-import {initProps} from "./componentProps"
+import {initProps} from "./componentProps";
+import {emit} from "./compoentEmit"
 //创建组件实例函数
 export function createComponentInstance(vnode: any) {
   console.log("===创建组件实例===", vnode);
@@ -9,8 +10,10 @@ export function createComponentInstance(vnode: any) {
     type: vnode.type,
     setupState: {},
     el:null,
-    props:{}
+    props:{},
+    emit:()=>{}
   }
+  component.emit=emit.bind(null,component) as any
   console.log("===返回组件实例===", component);
   return component;
 }
@@ -29,7 +32,9 @@ function setupStatefulCompontent(instance: any) {
   //判断是否用了setup 
   if (setup) {
     // 拿到setup中返回的值
-    const setupResult = setup(shallowReactive(instance.props));
+    const setupResult = setup(shallowReactive(instance.props),{
+      emit:instance.emit
+    });
     //对setup中的返回值进行处理
     handleSetupResult(instance, setupResult)
   }
