@@ -1,6 +1,7 @@
 
 import { createComponentInstance, setupComponent } from "./component"
-import { isObject } from "../shared/index"
+// import { isObject } from "../shared/index"
+import { ShapeFlages } from "../shared/ShapeFlages"
 export function render(vnode, rootContainer) {
   console.log('===render执行挂载逻辑===');
   //执行挂载逻辑
@@ -11,11 +12,11 @@ function path(vnode, rootContainer) {
   //判断是不是DOM元素是DOM元素就处理DOM是组件就处理组件
   console.log('===path根据type类型的不同来处理不同类型的vnode===');
 
-  let { type } = vnode
-  if (typeof type == "string") {
+  let { type,ShapeFlage } = vnode
+  if (ShapeFlage&ShapeFlages.element) {
     //todo 处理 element 类型
     processElement(vnode, rootContainer)
-  } else if (isObject(type)) {
+  } else if (ShapeFlage&ShapeFlages.statefule_component){
     //todo 处理 component 类型
     processComponent(vnode, rootContainer)
   }
@@ -30,13 +31,13 @@ function processElement(vnode: any, rootContainer: any) {
 }
 //挂载DOM
 function mountElement(vnode: any, rootContainer: any) {
-  let { type, props, children } = vnode;
+  let { type, props, children ,ShapeFlage} = vnode;
   //todo children分两种情况 一种是string类型 一种是数组类型
   let el =vnode.el=document.createElement(type);
-  if (Array.isArray(children)) {
+  if (ShapeFlage&ShapeFlages.array_children) {
     //因为children里面每一个都是虚拟节点还需要调用path函数
     mountChildren(children,el)
-  } else {
+  } else if(ShapeFlage&ShapeFlages.text_chilren) {
     el.textContent = children;
   }
   //处理props
