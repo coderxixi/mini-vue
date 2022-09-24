@@ -1,5 +1,5 @@
 import { ShapeFlages } from "../shared/ShapeFlages"
-function getShapeFlag(type) {
+export function getShapeFlag(type) {
   return typeof type == 'string' ? ShapeFlages.element : ShapeFlages.statefule_component
 }
 export function createVNode(type, props?, children?) {

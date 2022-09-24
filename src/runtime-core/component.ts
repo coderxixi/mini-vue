@@ -1,5 +1,6 @@
-import {publicInstanceProxyHandlers} from "./componentPublicInstance"
-
+import {publicInstanceProxyHandlers} from "./componentPublicInstance";
+import { shallowReactive } from "../reactivity/reactive"
+import {initProps} from "./componentProps"
 //创建组件实例函数
 export function createComponentInstance(vnode: any) {
   console.log("===创建组件实例===", vnode);
@@ -7,7 +8,8 @@ export function createComponentInstance(vnode: any) {
     vnode,
     type: vnode.type,
     setupState: {},
-    el:null
+    el:null,
+    props:{}
   }
   console.log("===返回组件实例===", component);
   return component;
@@ -15,6 +17,7 @@ export function createComponentInstance(vnode: any) {
 export function setupComponent(instance) {
   console.log("===初始化组件实例对象===", instance);
   // todo initProps
+  initProps(instance,instance.vnode.props)
   // todo initSlots
   // 拿到setup 中的返回值
   setupStatefulCompontent(instance)
@@ -26,7 +29,7 @@ function setupStatefulCompontent(instance: any) {
   //判断是否用了setup 
   if (setup) {
     // 拿到setup中返回的值
-    const setupResult = setup();
+    const setupResult = setup(shallowReactive(instance.props));
     //对setup中的返回值进行处理
     handleSetupResult(instance, setupResult)
   }
@@ -48,4 +51,6 @@ function finishComponentSetup(instance: any) {
   const component = instance.type;
   instance.render = component.render;
 }
+
+
 
