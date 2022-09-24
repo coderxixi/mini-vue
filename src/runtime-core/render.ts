@@ -12,11 +12,11 @@ function path(vnode, rootContainer) {
   //判断是不是DOM元素是DOM元素就处理DOM是组件就处理组件
   console.log('===path根据type类型的不同来处理不同类型的vnode===');
 
-  let { type,ShapeFlage } = vnode
-  if (ShapeFlage&ShapeFlages.element) {
+  let { type, ShapeFlage } = vnode
+  if (ShapeFlage & ShapeFlages.element) {
     //todo 处理 element 类型
     processElement(vnode, rootContainer)
-  } else if (ShapeFlage&ShapeFlages.statefule_component){
+  } else if (ShapeFlage & ShapeFlages.statefule_component) {
     //todo 处理 component 类型
     processComponent(vnode, rootContainer)
   }
@@ -31,28 +31,40 @@ function processElement(vnode: any, rootContainer: any) {
 }
 //挂载DOM
 function mountElement(vnode: any, rootContainer: any) {
-  let { type, props, children ,ShapeFlage} = vnode;
+  let { type, props, children, ShapeFlage } = vnode;
   //todo children分两种情况 一种是string类型 一种是数组类型
-  let el =vnode.el=document.createElement(type);
-  if (ShapeFlage&ShapeFlages.array_children) {
+  let el = vnode.el = document.createElement(type);
+  if (ShapeFlage & ShapeFlages.array_children) {
     //因为children里面每一个都是虚拟节点还需要调用path函数
-    mountChildren(children,el)
-  } else if(ShapeFlage&ShapeFlages.text_chilren) {
+    mountChildren(children, el)
+  } else if (ShapeFlage & ShapeFlages.text_chilren) {
     el.textContent = children;
   }
   //处理props
   for (const key in props) {
     //拿到props中的属性值
     const val = props[key]
-    //设置DOM元素的属性
-    el.setAttribute(key, val)
+    //注册事件相关
+    //判断是不是事件
+    const isOn = (key:string) =>/^on[A-Z]/.test(key) ;
+    //获取事件名称
+  
+    if (isOn(key)) {
+      const eventName=key.slice(2).toLowerCase()
+      el.addEventListener(eventName, val)
+    } else {
+      //设置DOM元素的属性
+      el.setAttribute(key, val)
+    }
+
   }
   rootContainer.appendChild(el)
   console.log("divType", el, vnode, rootContainer);
 
 }
+
 //处理children
-function mountChildren(children,el){
+function mountChildren(children, el) {
   children.forEach(v => {
     path(v, el)
   })
@@ -70,17 +82,17 @@ function mountComponent(vnode: any, rootContainer: any) {
 
   //传入件实例 初始化组件
   setupComponent(instance);
-  setupRenderEffect(instance, rootContainer,vnode)
+  setupRenderEffect(instance, rootContainer, vnode)
 }
 //调用render函数
-function setupRenderEffect(instance: any, rootContainer: any,vnode:any,) {
+function setupRenderEffect(instance: any, rootContainer: any, vnode: any,) {
 
-  const {proxy}=instance
+  const { proxy } = instance
   //拿到虚拟节点树
   const subTree = instance.render.call(proxy);
   //将虚拟节点转成真实的DOM元素
   path(subTree, rootContainer);
-  vnode.el=subTree.el
+  vnode.el = subTree.el
 }
 
 
