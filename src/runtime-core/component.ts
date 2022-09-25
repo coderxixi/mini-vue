@@ -5,7 +5,9 @@ import {emit} from "./compoentEmit";
 import {initSlots} from "./componentSlots";
 
 //创建组件实例函数
-export function createComponentInstance(vnode: any) {
+export function createComponentInstance(vnode:any,parent) {
+  console.log("parent",parent);
+  
   console.log("===创建组件实例===", vnode);
   const component = {
     vnode,
@@ -14,6 +16,8 @@ export function createComponentInstance(vnode: any) {
     el:null,
     props:{},
     slots:{},
+    provides:parent?parent.provides:{},
+    parent,
     emit:()=>{}
   }
   component.emit=emit.bind(null,component) as any
