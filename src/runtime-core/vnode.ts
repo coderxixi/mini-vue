@@ -16,6 +16,12 @@ export function createVNode(type, props?, children?) {
   } else if (Array.isArray(children)) {
     vnode.ShapeFlage = vnode.ShapeFlage | ShapeFlages.array_children
   }
+
+  if(vnode.ShapeFlage&ShapeFlages.statefule_component){
+    if(typeof children=="object"&&children!=null){
+      vnode.ShapeFlage==ShapeFlages.slot_children
+    }
+  }
   console.log('===返回vnode===', vnode);
 
   return vnode

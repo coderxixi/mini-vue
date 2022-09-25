@@ -3,4 +3,5 @@ export const enum ShapeFlages {
   statefule_component=1 << 1,//vnode节点是组件类型 0010
   text_chilren=1 << 2,//vnode节点 chilren 的类型是string 100
   array_children=1 << 3,//vnode节点是 chilren 的类型是array 10000
+  slot_children=1<<4 //组件的chilren 是对象类型
 }
