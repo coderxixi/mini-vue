@@ -7,7 +7,7 @@ export const Foo = {
    
     return h('div', { class: 'id' }, [renderSlots(this.$slots, 'header',{
       age:18
-    }), foo, renderSlots(this.$slots, 'footer')])
+    }), foo, renderSlots(this.$slots, 'footer',{age:18})])
   },
   setup(props, { emit }) {
     return {

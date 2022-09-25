@@ -2,7 +2,8 @@ import {publicInstanceProxyHandlers} from "./componentPublicInstance";
 import { shallowReactive } from "../reactivity/reactive"
 import {initProps} from "./componentProps";
 import {emit} from "./compoentEmit";
-import {initSlots} from "./componentSlots"
+import {initSlots} from "./componentSlots";
+
 //创建组件实例函数
 export function createComponentInstance(vnode: any) {
   console.log("===创建组件实例===", vnode);

@@ -1,7 +1,10 @@
 import { ShapeFlages } from "../shared/ShapeFlages"
 export function getShapeFlag(type) {
   return typeof type == 'string' ? ShapeFlages.element : ShapeFlages.statefule_component
-}
+} 
+
+export const Fragment=Symbol('Fragment');
+export const Text=Symbol('Text')
 export function createVNode(type, props?, children?) {
   console.log("====createVNode创建vnode===");
   const vnode = {
@@ -18,13 +21,17 @@ export function createVNode(type, props?, children?) {
   }
 
   if(vnode.ShapeFlage&ShapeFlages.statefule_component){
-    if(typeof children=="object"&&children!=null){
+    if(typeof children=="object"){
       vnode.ShapeFlage==ShapeFlages.slot_children
     }
   }
   console.log('===返回vnode===', vnode);
 
   return vnode
+}
+
+export function createTextVnode(text){
+  return createVNode(Text,{},text)
 }
 
 

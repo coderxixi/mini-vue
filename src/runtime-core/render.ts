@@ -1,6 +1,6 @@
 
 import { createComponentInstance, setupComponent } from "./component"
-
+import {Fragment,Text} from "./vnode"
 // import { isObject } from "../shared/index"
 import { ShapeFlages } from "../shared/ShapeFlages"
 export function render(vnode, rootContainer) {
@@ -10,18 +10,49 @@ export function render(vnode, rootContainer) {
 }
 //挂载逻辑
 function path(vnode, rootContainer) {
+  let { type, ShapeFlage } = vnode
   //判断是不是DOM元素是DOM元素就处理DOM是组件就处理组件
   console.log('===path根据type类型的不同来处理不同类型的vnode===');
-
-  let { type, ShapeFlage } = vnode
-  if (ShapeFlage & ShapeFlages.element) {
-    //todo 处理 element 类型
-    processElement(vnode, rootContainer)
-  } else if (ShapeFlage & ShapeFlages.statefule_component) {
-    //todo 处理 component 类型
-    processComponent(vnode, rootContainer)
+  // Fragment 类型 只渲染里面的children
+  console.log("tuioasoiaofasfdadfadfasdfasd",type);
+  
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, rootContainer)
+      break;
+      case Text:
+       processText(vnode, rootContainer)
+      break
+    default:
+      if (ShapeFlage & ShapeFlages.element) {
+        //todo 处理 element 类型
+        processElement(vnode, rootContainer)
+      } else if (ShapeFlage & ShapeFlages.statefule_component) {
+        //todo 处理 component 类型
+        processComponent(vnode, rootContainer)
+      }
+      break;
   }
+
+
 }
+//处理文本类型
+
+function processText(vnode, rootContainer) {
+  const {children}=vnode;
+  console.log("processText",children);
+  
+  const textNode=vnode.el=document.createTextNode(children);
+  rootContainer.append(textNode)
+}
+
+//处理 Fragment类型
+
+function processFragment(vnode:any,rootContainer:any) {
+  let {children}=vnode
+  return mountChildren(children,rootContainer)
+}
+
 //处理DOM类型函数
 function processElement(vnode: any, rootContainer: any) {
   // todo分为初始化过程和更新逻辑
@@ -47,11 +78,11 @@ function mountElement(vnode: any, rootContainer: any) {
     const val = props[key]
     //注册事件相关
     //判断是不是事件
-    const isOn = (key:string) =>/^on[A-Z]/.test(key) ;
+    const isOn = (key: string) => /^on[A-Z]/.test(key);
     //获取事件名称
-  
+
     if (isOn(key)) {
-      const eventName=key.slice(2).toLowerCase()
+      const eventName = key.slice(2).toLowerCase()
       el.addEventListener(eventName, val)
     } else {
       //设置DOM元素的属性
@@ -95,6 +126,8 @@ function setupRenderEffect(instance: any, rootContainer: any, vnode: any,) {
   path(subTree, rootContainer);
   vnode.el = subTree.el
 }
+
+
 
 
 
