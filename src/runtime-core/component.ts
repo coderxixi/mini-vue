@@ -35,10 +35,13 @@ function setupStatefulCompontent(instance: any) {
   const { setup } = component;
   //判断是否用了setup 
   if (setup) {
+    setCurrentInstance(instance)
     // 拿到setup中返回的值
     const setupResult = setup(shallowReactive(instance.props),{
       emit:instance.emit
     });
+    setCurrentInstance(null)
+   
     //对setup中的返回值进行处理
     handleSetupResult(instance, setupResult)
   }
@@ -61,6 +64,14 @@ function finishComponentSetup(instance: any) {
   instance.render = component.render;
 }
 
+//返回当前组件实例对象
+let currentInstance=null
+export function getCurrentInstance(){
+return currentInstance
+}
 
 
+function setCurrentInstance(instance){
+  currentInstance=instance
+}
 
