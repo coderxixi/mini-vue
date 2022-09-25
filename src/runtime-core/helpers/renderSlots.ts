@@ -2,6 +2,10 @@ import { createVNode } from "../vnode";
 
 
 
-export function renderSlots(slots){
-   return createVNode('div',{},slots)
+export function renderSlots(slots,nameSlot){
+  const slot=slots[nameSlot];
+  if(slot){
+    return createVNode('div',{},slot)
+  }
+  
 }
