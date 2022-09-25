@@ -30,7 +30,7 @@ export function isProxy(value){
 }
 
 function createActiveObject(raw:any,baseHandlers:any){
-  if(isObject(raw)){
+  if(!isObject(raw)){
     console.warn(`${raw}必须是一个对象`);
     return raw
   }

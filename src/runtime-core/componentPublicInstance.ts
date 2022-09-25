@@ -1,6 +1,7 @@
 
 const publicProperiesMap={
-  $el:(i)=>i.vnode.el
+  $el:(i)=>i.vnode.el,
+  $slots:(i)=>i.slots
 }
 
 import {hasOwn} from "../shared/index"

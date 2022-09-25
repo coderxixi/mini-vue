@@ -1,7 +1,8 @@
 import {publicInstanceProxyHandlers} from "./componentPublicInstance";
 import { shallowReactive } from "../reactivity/reactive"
 import {initProps} from "./componentProps";
-import {emit} from "./compoentEmit"
+import {emit} from "./compoentEmit";
+import {initSlots} from "./componentSlots"
 //创建组件实例函数
 export function createComponentInstance(vnode: any) {
   console.log("===创建组件实例===", vnode);
@@ -11,6 +12,7 @@ export function createComponentInstance(vnode: any) {
     setupState: {},
     el:null,
     props:{},
+    slots:{},
     emit:()=>{}
   }
   component.emit=emit.bind(null,component) as any
@@ -22,6 +24,7 @@ export function setupComponent(instance) {
   // todo initProps
   initProps(instance,instance.vnode.props)
   // todo initSlots
+  initSlots(instance,instance.vnode.children)
   // 拿到setup 中的返回值
   setupStatefulCompontent(instance)
 }
@@ -56,6 +59,7 @@ function finishComponentSetup(instance: any) {
   const component = instance.type;
   instance.render = component.render;
 }
+
 
 
 
