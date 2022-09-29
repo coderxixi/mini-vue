@@ -37,7 +37,6 @@ function path(vnode, rootContainer,parentComponent) {
 
 }
 //处理文本类型
-
 function processText(vnode, rootContainer) {
   const {children}=vnode;
   console.log("processText",children);

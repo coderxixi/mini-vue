@@ -19,7 +19,7 @@ export function createVNode(type, props?, children?) {
   } else if (Array.isArray(children)) {
     vnode.ShapeFlage = vnode.ShapeFlage | ShapeFlages.array_children
   }
-
+//children 是一个函数式组件
   if(vnode.ShapeFlage&ShapeFlages.statefule_component){
     if(typeof children=="object"){
       vnode.ShapeFlage==ShapeFlages.slot_children
