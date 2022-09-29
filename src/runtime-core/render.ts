@@ -125,6 +125,7 @@ function setupRenderEffect(instance: any, rootContainer: any, vnode: any) {
   path(subTree, rootContainer,instance);
   vnode.el = subTree.el
 }
+//ce
 
 
 
