@@ -2,6 +2,7 @@
 
 // 用一个全局变量存储被注册的副作用函数
 let activeEffect = null;
+const effectStack = [] // 新增副作用函数栈
 let data = {
   name: 'xixi',
   age: 18,
@@ -40,6 +41,13 @@ function trigger(target, key) {
   // 根据 key 取得所有副作用函数 effects
   let effects = depsMap.get(key);
   const effectsToRun = new Set(effects)
+  // 如果 trigger 触发执行的副作用函数与当前正在执行的副作用函数相同，则不触发执行
+    effects && effects.forEach(effectFn => {
+     if (effectFn !== activeEffect) { // 新增
+        effectsToRun.add(effectFn)
+     }
+     })
+ 
   // 执行副作用函数
   effectsToRun.forEach(effectFn => effectFn())
   // effects && effects.forEach(fn => fn())
@@ -67,9 +75,9 @@ const obj = new Proxy(data, {
   },
   // 拦截设置操作
   set(target, key, newValue) {
-
+    target[key]=newValue
     trigger(target, key)
-    return Reflect.set(target, key, newValue)
+    // return Reflect.set(target,key,newValue)
   }
 })
 
@@ -81,7 +89,12 @@ function effect(fn) {
   const effectFn = () => {
     cleanup(effectFn)
     activeEffect = effectFn;
-    fn()
+    // 在调用副作用函数之前将当前副作用函数压入栈中
+     effectStack.push(effectFn) // 新增
+     fn()
+     // 在当前副作用函数执行完毕后，将当前副作用函数弹出栈，并把activeEffect 还原为之前的值
+     effectStack.pop() // 新增
+     activeEffect = effectStack[effectStack.length - 1] // 新增
   }
   // activeEffect.deps 用来存储所有与该副作用函数相关联的依赖集合
   effectFn.deps = [];
@@ -90,12 +103,21 @@ function effect(fn) {
 }
 
 
-effect(() => {
-  document.body.innerText = obj.ok ? obj.text : 'not'
-  console.log('age', obj.age);
+// effect(() => {
+ 
+//   console.log('age', obj.age);
+// })
+
+
+
+effect(()=>{
+console.log('第一层',obj.name);
+  effect(()=>{
+    console.log('第二层',obj.age);
+  })
 })
-obj.name = 'xixi';
-obj.ok = false
+// obj.name='xiaoli'
+obj.age=19
 
 
 
