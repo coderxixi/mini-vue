@@ -10,7 +10,7 @@ let data = {
   text: 'hello world'
 }
 // 在 get 拦截函数内调用 track 函数追踪变化
-function track(target, key) {
+ function track(target, key) {
   //没有 activeEffect，直接 return
   if (!activeEffect) return target[key];
   // 根据 target 从“桶”中取得 depsMap，它也是一个 Map 类型：key -->effects
@@ -35,7 +35,7 @@ function track(target, key) {
 
 }
 // 在 set 拦截函数内调用 trigger 函数触发变化
-function trigger(target, key) {
+ function trigger(target, key) {
   // 根据 target 从桶中取得 depsMap，它是 key --> effects
   let depsMap = bucket.get(target);
   // 根据 key 取得所有副作用函数 effects
@@ -61,7 +61,7 @@ function trigger(target, key) {
   // effects && effects.forEach(fn => fn())
 }
 
-function cleanup(effectFn) {
+ function cleanup(effectFn) {
   // 遍历 effectFn.deps 数组
   for (let i = 0; i < effectFn.deps.length; i++) {
     // deps 是依赖集合
@@ -88,6 +88,23 @@ const obj = new Proxy(data, {
     // return Reflect.set(target,key,newValue)
   }
 })
+
+
+ function ref(data){
+  return new Proxy(data, {
+    // 拦截读取操作
+    get(target, key) {
+      track(target, key)
+      return target[key]
+    },
+    // 拦截设置操作
+    set(target, key, newValue) {
+      target[key]=newValue
+      trigger(target, key)
+      // return Reflect.set(target,key,newValue)
+    }
+  })
+}
  // 定义一个任务队列
   const jobQueue = new Set();
    // 使用 Promise.resolve() 创建一个 promise 实例，我们用它将一个任务添加到微任务队列
@@ -116,7 +133,7 @@ const obj = new Proxy(data, {
 
 
 // effect 函数用于注册副作用函数
-function effect(fn,options={}) {
+  function effect(fn,options={}) {
   // 调用 cleanup 函数完成清除工作
   
   // 当调用 effect 注册副作用函数时，将副作用函数 fn 赋值给
@@ -125,31 +142,40 @@ function effect(fn,options={}) {
     activeEffect = effectFn;
     // 在调用副作用函数之前将当前副作用函数压入栈中
      effectStack.push(effectFn) // 新增
-     fn()
+      const res= fn()
      // 在当前副作用函数执行完毕后，将当前副作用函数弹出栈，并把activeEffect 还原为之前的值
      effectStack.pop() // 新增
      activeEffect = effectStack[effectStack.length - 1] // 新增
+
+     return res
   }
   // 将 options 挂载到 effectFn 上 
    effectFn.options = options // 新增
   // activeEffect.deps 用来存储所有与该副作用函数相关联的依赖集合
-  effectFn.deps = [];
-  // 执行副作用函数
-  effectFn()
+    effectFn.deps = [];
+ 
+  console.log('options.lazy',options.lazy);
+  // 只有非 lazy 的时候，才执行
+ if (!options.lazy) { // 新增
+   // 执行副作用函数
+    effectFn()
+   }
+ // 将副作用函数作为返回值返回
+ return effectFn
 }
 
 
-effect(() => {
+// effect(() => {
  
-  console.log('age', obj.age);
-},{
-  scheduler(fn){
-   // 每次调度时，将副作用函数添加到 jobQueue 队列中
-jobQueue.add(fn)
- // 调用 flushJob 刷新队列
- flushJob()
-  }
-})
+//   console.log('age', obj.age);
+// },{
+//   scheduler(fn){
+//    // 每次调度时，将副作用函数添加到 jobQueue 队列中
+// jobQueue.add(fn)
+//  // 调用 flushJob 刷新队列
+//  flushJob()
+//   }
+// })
 
 
 
@@ -160,11 +186,82 @@ jobQueue.add(fn)
 //   })
 // })
 // obj.name='xiaoli'
-obj.age++;
-obj.age++;
+// obj.age++;
+// obj.age++;
 
-console.log('结束了');
+// console.log('结束了');
 
+
+
+
+//  computed  计算属性
+
+let info=ref({
+  name:'xixi',
+  age:18
+})
+
+
+//  const fn= effect(
+//   ()=>{
+//   console.log('computed',info.age);
+// },
+// {
+//   lazy:true
+// }
+// )
+// fn();
+
+
+function computed(getter){
+  // value 用来缓存上一次计算的值
+  let value;
+  //标志 用来标识是否需要重新计算值，为 true 则意味着“脏”，需要计
+  let dirty=true; 
+   let  effectFn=effect(getter,{
+    lazy:true,
+    scheduler(){
+      if (!dirty) {
+         dirty = true
+         // 当计算属性依赖的响应式数据变化时，手动调用 trigger 函数触发响应
+         trigger(obj, 'value')
+         }
+   }});
+
+   const obj = {
+     // 当读取 value 时才执行 effectFn
+     get value() {
+      if (dirty) {
+         value = effectFn()
+         // 将 dirty 设置为 false，下一次访问直接使用缓存到 value 中的值
+         dirty = false
+         }
+         // 当读取 value 时，手动调用 track 函数进行追踪
+      track(obj, 'value')
+       return value
+     }
+     }
+
+     return obj
+}
+
+
+let res= computed(()=>{
+  return info.age+2
+});
+
+effect(() => {
+  // 在该副作用函数中读取 sumRes.value
+  console.log(res.value)
+ })
+ info.age++;
+ info.age++;
+ info.age++;
+ info.age++;
+
+// console.log('res',res.value);
+// console.log('res',res.value);
+// console.log('res',res.value);
 
 
 
