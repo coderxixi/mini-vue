@@ -49,7 +49,15 @@ function trigger(target, key) {
      })
  
   // 执行副作用函数
-  effectsToRun.forEach(effectFn => effectFn())
+  effectsToRun.forEach((effectFn) => {
+    if (effectFn.options.scheduler) { // 新增
+       effectFn.options.scheduler(effectFn) // 新增
+       } else {
+       // 否则直接执行副作用函数（之前的默认行为）
+       effectFn() // 新增
+     }
+   
+  })
   // effects && effects.forEach(fn => fn())
 }
 
@@ -80,9 +88,35 @@ const obj = new Proxy(data, {
     // return Reflect.set(target,key,newValue)
   }
 })
+ // 定义一个任务队列
+  const jobQueue = new Set();
+   // 使用 Promise.resolve() 创建一个 promise 实例，我们用它将一个任务添加到微任务队列
+  const p = Promise.resolve() 
+ // 一个标志代表是否正在刷新队列
+  let isFlushing = false;
+  function flushJob() {
+     // 如果队列正在刷新，则什么都不做
+     if (isFlushing) return
+     // 设置为 true，代表正在刷新
+     isFlushing = true
+     // 在微任务队列中刷新 jobQueue 队列
+     p.then(() => {
+     jobQueue.forEach(job => job())
+     }).finally(() => {
+     // 结束后重置 isFlushing
+     isFlushing = false
+     })
+     }
+
+
+
+
+
+
+
 
 // effect 函数用于注册副作用函数
-function effect(fn) {
+function effect(fn,options={}) {
   // 调用 cleanup 函数完成清除工作
   
   // 当调用 effect 注册副作用函数时，将副作用函数 fn 赋值给
@@ -96,6 +130,8 @@ function effect(fn) {
      effectStack.pop() // 新增
      activeEffect = effectStack[effectStack.length - 1] // 新增
   }
+  // 将 options 挂载到 effectFn 上 
+   effectFn.options = options // 新增
   // activeEffect.deps 用来存储所有与该副作用函数相关联的依赖集合
   effectFn.deps = [];
   // 执行副作用函数
@@ -103,21 +139,31 @@ function effect(fn) {
 }
 
 
-// effect(() => {
+effect(() => {
  
-//   console.log('age', obj.age);
-// })
-
-
-
-effect(()=>{
-console.log('第一层',obj.name);
-  effect(()=>{
-    console.log('第二层',obj.age);
-  })
+  console.log('age', obj.age);
+},{
+  scheduler(fn){
+   // 每次调度时，将副作用函数添加到 jobQueue 队列中
+jobQueue.add(fn)
+ // 调用 flushJob 刷新队列
+ flushJob()
+  }
 })
+
+
+
+// effect(()=>{
+// console.log('第一层',obj.name);
+//   effect(()=>{
+//     console.log('第二层',obj.age);
+//   })
+// })
 // obj.name='xiaoli'
-obj.age=19
+obj.age++;
+obj.age++;
+
+console.log('结束了');
 
 
 
