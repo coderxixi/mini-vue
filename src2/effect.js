@@ -284,9 +284,18 @@ effect(() => {
    return value
    }
   // watch 函数接收两个参数，source 是响应式数据，cb 是回调函数
- function watch(source,cb){
+ function watch(source,cb,options={}){
   let getter;//定义getter函数
   // 如果 source 是函数，说明用户传递的是 getter，所以直接把 source 赋值给 getter
+  // 提取 scheduler 调度函数为一个独立的 job 函数
+const job = () => {
+   // 在 scheduler 中重新执行副作用函数，得到的是新值
+   newValue = effectFn()
+       
+   // 当数据变化时，调用回调函数 cb
+   cb(newValue, oldValue);
+   oldValue=newValue
+ }
   if (typeof source === 'function') {
      getter = source
     } else {
@@ -299,18 +308,18 @@ effect(() => {
     return getter()
     },{
       lazy: true,
-      scheduler(){
-        // 在 scheduler 中重新执行副作用函数，得到的是新值
-         newValue = effectFn()
-       
-        // 当数据变化时，调用回调函数 cb
-        cb(newValue, oldValue);
-        oldValue=newValue
-      }
+      scheduler:job
     })
+    if (options.immediate) {
+       // 当 immediate 为 true 时立即执行 job，从而触发回调执行
+      job()
+       } else {
+         // 手动调用副作用函数，拿到的值就是旧值 
+      oldValue = effectFn()
+     }
    
     // 手动调用副作用函数，拿到的值就是旧值 
-    oldValue = effectFn()
+    // oldValue = effectFn()
  }
  let info1=ref({
   name:'刘圣书',
@@ -318,12 +327,15 @@ effect(() => {
  })
  watch(()=>info1.age,(newValue, oldValue)=>{
   console.log('infi.age数据变了重新执行',newValue, oldValue);
+ },{
+  // 回调函数会在 watch 创建时立即执行一次
+  immediate: true
  })
- info1.age++;
- info1.age++;
- info1.age++;
- info1.age++;
- info1.age++;
+//  info1.age++;
+//  info1.age++;
+//  info1.age++;
+//  info1.age++;
+//  info1.age++;
 
 
 
