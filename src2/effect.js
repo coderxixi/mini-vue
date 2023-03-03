@@ -246,13 +246,11 @@ function computed(getter){
 }
 
 
-let res= computed(()=>{
-  return info.age+2
-});
+let res= computed(()=>info.age+2);
 
 effect(() => {
   // 在该副作用函数中读取 sumRes.value
-  console.log(res.value)
+  console.log('数据变了',res.value)
  })
  info.age++;
  info.age++;
@@ -262,6 +260,75 @@ effect(() => {
 // console.log('res',res.value);
 // console.log('res',res.value);
 // console.log('res',res.value);
+
+
+
+// watch   监听
+
+
+//所谓 watch，其本质就是观测一个响应式数据，当数据发生变化时通知并执行相应的回调函数。举个例子：
+
+ function traverse(value, seen = new Set()) {
+   // 如果要读取的数据是原始值，或者已经被读取过了，那么什么都不做
+   if (typeof value !== 'object' || value === null ||seen.has(value)) return
+   // 将数据添加到 seen 中，代表遍历地读取过了，避免循环引用引起的死循环
+   seen.add(value)
+   // 暂时不考虑数组等其他结构
+   // 假设 value 就是一个对象，使用 for...in 读取对象的每一个值，并递归地调用 traverse 进行处理
+  
+   for (const k in value) {
+   ;
+   traverse(value[k], seen)
+   }
+   
+   return value
+   }
+  // watch 函数接收两个参数，source 是响应式数据，cb 是回调函数
+ function watch(source,cb){
+  let getter;//定义getter函数
+  // 如果 source 是函数，说明用户传递的是 getter，所以直接把 source 赋值给 getter
+  if (typeof source === 'function') {
+     getter = source
+    } else {
+   // 否则按照原来的实现调用 traverse 递归地读取
+    getter = () => traverse(source)
+   }
+   // 定义旧值与新值
+    let oldValue, newValue;
+   let effectFn= effect(()=>{
+    return getter()
+    },{
+      lazy: true,
+      scheduler(){
+        // 在 scheduler 中重新执行副作用函数，得到的是新值
+         newValue = effectFn()
+       
+        // 当数据变化时，调用回调函数 cb
+        cb(newValue, oldValue);
+        oldValue=newValue
+      }
+    })
+   
+    // 手动调用副作用函数，拿到的值就是旧值 
+    oldValue = effectFn()
+ }
+ let info1=ref({
+  name:'刘圣书',
+  age:18
+ })
+ watch(()=>info1.age,(newValue, oldValue)=>{
+  console.log('infi.age数据变了重新执行',newValue, oldValue);
+ })
+ info1.age++;
+ info1.age++;
+ info1.age++;
+ info1.age++;
+ info1.age++;
+
+
+
+
+
 
 
 
