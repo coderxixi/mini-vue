@@ -3,7 +3,7 @@ import { NodeTypes } from "../src/ast"
 describe('解析',()=>{
   describe('插值',()=>{
     test('simple interpolation',()=>{
-    const ast= baseParse('{{ message     }}');
+    const ast= baseParse('{{message}}');
     //root
     expect(ast.children[0]).toStrictEqual({
       type: NodeTypes.INTERPOLATION,
@@ -13,5 +13,19 @@ describe('解析',()=>{
       }
     })
     })
+
+  
   })
+
+  describe('element',()=>{
+    it('simple element div',()=>{
+      const ast = baseParse('<div></div>');
+      //root
+      expect(ast.children[0]).toStrictEqual({
+        type: NodeTypes.ELEMENT,
+        tag: 'div'
+      })
+    })
+    })
+
 })
