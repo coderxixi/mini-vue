@@ -28,6 +28,10 @@ function parseChildren(context) {
       node = parseElement(context)
     }
   }
+
+  if(!node){
+    node = parseText(context)
+  }
   nodes.push(node)
   return nodes
 }
@@ -39,7 +43,7 @@ function parseInteropolation(context) {
   const closeIndex = context.source.indexOf(closeDelimite, openDelimiter.length);
   advanceBy(context, openDelimiter.length)
   const rawContentLength = closeIndex - openDelimiter.length;
-  const rawContent = context.source.slice(0, rawContentLength);
+  const rawContent = parseTextData(context, rawContentLength)   // context.source.slice(0, rawContentLength);
   const content = rawContent.trim()
   advanceBy(context, rawContentLength + closeDelimite.length)
 
@@ -68,9 +72,7 @@ function parseElement(context: any) {
 
   parseTag(context,TagType.End);
   return element
- 
 }
-
 function parseTag(context:any,type:any){
   //1.解析 tag
   const match: any = /^<\/?([a-z]*)/i.exec(context.source);
@@ -84,4 +86,18 @@ function parseTag(context:any,type:any){
     type: NodeTypes.ELEMENT,
     tag: tag
   }
+}
+//解析 text
+function parseText(context:any){
+  const content = parseTextData(context, context.source.length)
+  return {
+    type: NodeTypes.TEXT,
+    content: content
+  }
+}
+function parseTextData(context:any,length:any){
+  //1 获取当前法内容
+  const content = context.source.slice(0, length)
+  advanceBy(context, context.length);
+  return content
 }
